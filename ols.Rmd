@@ -1,0 +1,86 @@
+---
+title: "NFL OLS Regression"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+data <- read.csv("first_lr.csv")
+colnames(data[,!(names(data) %in% "Yards")])
+```
+```{r}
+smp_size <- floor(0.75 * nrow(data))
+
+set.seed(632)
+train_ind <- sample(seq_len(nrow(data)), size = smp_size)
+
+train <- data[train_ind, ]
+test <- data[-train_ind, ]
+
+all_data <- subset(data, select = c(`PlayerHeight`, `PlayerWeight`, `Down`, `YardLine`, `Distance`, `Week`, `Temperature`, `Humidity`, `HomeScoreBeforePlay`, `VisitorScoreBeforePlay`, `Yards`))
+test <- subset(test, select = c(`PlayerHeight`, `PlayerWeight`, `Down`, `YardLine`, `Distance`, `Week`, `Temperature`, `Humidity`, `HomeScoreBeforePlay`, `VisitorScoreBeforePlay`, `Yards`))
+train <- subset(train, select = c(`PlayerHeight`, `PlayerWeight`, `Down`, `YardLine`, `Distance`, `Week`, `Temperature`, `Humidity`, `HomeScoreBeforePlay`, `VisitorScoreBeforePlay`, `Yards`))
+```
+
+
+```{r}
+fit <- lm(Yards ~ ., data=train)
+summary(fit)
+```
+
+```{r}
+plot(fitted(fit), resid(fit))
+abline(0,0, col="red")
+```
+
+```{r}
+preds <- predict(fit_no_int, newdata=test)
+mean((test$Yards - preds)^2)
+```
+
+```{r}
+plot(test$Yards, preds)
+abline(0,1)
+```
+
+```{r}
+fit2 <- lm(Yards ~ PlayerWeight + Down + YardLine + Distance + Temperature, data=train)
+summary(fit2)
+```
+
+```{r}
+plot(fitted(fit2), resid(fit2))
+abline(0,0, col="red")
+```
+
+```{r}
+preds <- predict(fit2, newdata=test)
+mean((test$Yards - preds)^2)
+```
+
+```{r}
+plot(test$Yards, preds)
+abline(0,1)
+```
+
+```{r}
+fit_no_int <- lm(Yards ~ 0 + PlayerWeight + Down + YardLine + Distance + Temperature, data=train)
+summary(fit_no_int)
+```
+
+```{r}
+plot(fitted(fit_no_int), resid(fit_no_int))
+abline(0,0, col="red")
+```
+```{r}
+preds <- predict(fit_no_int, newdata=test)
+mean((test$Yards - preds)^2)
+```
+
+```{r}
+plot(test$Yards, preds)
+abline(0,1)
+```
